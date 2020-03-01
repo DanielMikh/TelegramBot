@@ -1,50 +1,49 @@
 # Работа с клавиатурой
 
 from MainDB import MainDB
-from telebot import types
+from telegram import KeyboardButton, ReplyMarkup, ReplyKeyboardMarkup 
+from telegram.ext import Updater
 
 class Keyboard(MainDB):
 
-    back_button = types.KeyboardButton('На главную')
+    back_button = KeyboardButton('На главную')
 
     # Вызов главного меню
     def main_menu(self, for_admin = False):
-        markup = types.ReplyKeyboardMarkup(row_width = 3, resize_keyboard = True)
-        button = []
+        first_buttons_row = []
+        admin_buttons_row = []
+        buttons = [first_buttons_row, admin_buttons_row]
         for curChar in self.load:
-            button.append(types.KeyboardButton(curChar))
+            first_buttons_row.append(KeyboardButton(curChar))
 
         if for_admin:
-            button.append(types.KeyboardButton('Добавить раздел'))
+            admin_buttons_row.append(KeyboardButton('Добавить раздел'))
 
-        markup.add(*button)
+        markup = ReplyKeyboardMarkup(buttons, resize_keyboard = True)
         return markup
 
     def create_keyboard(self, text, for_admin = False):
 
-        markup = types.ReplyKeyboardMarkup(row_width = 3, resize_keyboard = True)
-
         curSection = list(self.find(text, self.load))
-        print(curSection)
-
+        print(":::::",curSection[0],'\n')
+        
         msg = 'Пусто'
-        button = []
+        buttons = []
         for item in curSection[0]:
             if item == 'text_msg':
                 if curSection[0][item] != '':
                     msg = curSection[0][item]
-                else: pass
+                else: continue
             else:
-                button.append(types.KeyboardButton(item))
+                buttons.append([KeyboardButton(item)])
 
         if for_admin:
-            button.append(types.KeyboardButton('Добавить раздел'))
-            button.append(types.KeyboardButton('Изменить описание'))
-            button.append(types.KeyboardButton('Удалить раздел'))
+            buttons.append([KeyboardButton('Добавить раздел')])
+            buttons.append([KeyboardButton('Изменить описание')])
+            buttons.append([KeyboardButton('Удалить раздел')])
 
-        markup.add(*button)
-        markup.add(self.back_button)
-
+        buttons.append([self.back_button])
+        markup = ReplyKeyboardMarkup(buttons, resize_keyboard = True)
         return msg, markup
 
     #Рекурсивная функция поиска 

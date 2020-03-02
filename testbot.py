@@ -12,29 +12,32 @@ user_db = UserDB()
 main_db = MainDB()
 keyboard = Keyboard()
 
+# def send_admin(update, context):
+
+
 def send_start(update, context):
 
     user = User(update.message)
 
     if user.id in user_db.users:
         context.bot.send_photo(user.id, random.choice(photo))
-        context.bot.send_message(chat_id=update.effective_chat.id, text=random.choice(msg1).format(name = user.username), reply_markup = keyboard.main_menu(user.is_admin))
+        context.bot.send_message(chat_id = user.id, text = random.choice(msg).format(name = user.username), reply_markup = keyboard.main_menu())
     else: 
         context.bot.send_photo(user.id, random.choice(photo))
-        context.bot.send_message(user.id, random.choice(msg).format(name = user.username), reply_markup = keyboard.main_menu(user.is_admin))
+        context.bot.send_message(user.id, random.choice(msg1).format(name = user.username), reply_markup = keyboard.main_menu())
 
         user_db.save_user(user.id)
 
 def return_to_main_menu(update, context):  
     user = User(update.message) 
-    keyboard.main_menu(user.is_admin)
-    context.bot.send_message(user.id, 'Хорошо, сделано.', reply_markup = keyboard.main_menu(user.is_admin))
+    keyboard.main_menu()
+    context.bot.send_message(user.id, 'Хорошо, сделано.', reply_markup = keyboard.main_menu())
 
 
 def button_selection(update, context):
     user = User(update.message)
 
-    msg, markup = keyboard.create_keyboard(update.message.text, user.is_admin)
+    msg, markup = keyboard.create_keyboard(update.message.text)
     
     context.bot.send_message(user.id, msg, reply_markup = markup)
 

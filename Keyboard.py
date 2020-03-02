@@ -1,46 +1,49 @@
 # Работа с клавиатурой
-
 from MainDB import MainDB
-from telegram import KeyboardButton, ReplyMarkup, ReplyKeyboardMarkup 
-from telegram.ext import Updater
+from telegram import KeyboardButton, ReplyKeyboardMarkup 
+
 
 class Keyboard(MainDB):
 
     back_button = KeyboardButton('На главную')
 
     # Вызов главного меню
-    def main_menu(self, for_admin = False):
-        first_buttons_row = []
-        admin_buttons_row = []
-        buttons = [first_buttons_row, admin_buttons_row]
+    def main_menu(self):
+        buttons = [[]]
+        i = 0
         for curChar in self.load:
-            first_buttons_row.append(KeyboardButton(curChar))
-
-        if for_admin:
-            admin_buttons_row.append(KeyboardButton('Добавить раздел'))
-
+            if len(buttons[i]) == 3: 
+                i += 1
+                buttons.append([])
+                buttons[i].append(KeyboardButton(curChar))
+            else:
+                buttons[i].append(KeyboardButton(curChar))
+        
         markup = ReplyKeyboardMarkup(buttons, resize_keyboard = True)
         return markup
 
-    def create_keyboard(self, text, for_admin = False):
+    def create_keyboard(self, text):
 
         curSection = list(self.find(text, self.load))
         print(":::::",curSection[0],'\n')
         
-        msg = 'Пусто'
-        buttons = []
-        for item in curSection[0]:
-            if item == 'text_msg':
-                if curSection[0][item] != '':
-                    msg = curSection[0][item]
-                else: continue
-            else:
-                buttons.append([KeyboardButton(item)])
+        i = 0
 
-        if for_admin:
-            buttons.append([KeyboardButton('Добавить раздел')])
-            buttons.append([KeyboardButton('Изменить описание')])
-            buttons.append([KeyboardButton('Удалить раздел')])
+        msg = 'Пусто'
+
+        buttons = [[]]
+        for item in curSection[0]:
+            if item == 'text_msg' and curSection[0][item]!= '':
+                msg = curSection[0][item]
+            elif item == 'text_msg' and curSection[0][item] == '': 
+                continue
+            else:
+                if len(buttons[i]) == 3:
+                    i += 1
+                    buttons.append([])
+                    buttons[i].append(KeyboardButton(item))
+                else:
+                    buttons[i].append(KeyboardButton(item))
 
         buttons.append([self.back_button])
         markup = ReplyKeyboardMarkup(buttons, resize_keyboard = True)

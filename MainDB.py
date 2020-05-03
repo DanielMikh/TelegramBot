@@ -4,5 +4,8 @@ import json
 
 class MainDB():
     def __init__(self):
-        with open('testdb.py','r') as data:
+        with open('new_db.json','r') as data:
             self.load = json.load(data)
+    
+
+                        

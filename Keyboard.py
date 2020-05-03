@@ -22,6 +22,19 @@ class Keyboard(MainDB):
         markup = ReplyKeyboardMarkup(buttons, resize_keyboard = True)
         return markup
 
+    #Рекурсивная функция поиска 
+    def find(self, message, dictionary):
+        for k, v in dictionary.items():
+            if k == message:
+                yield v
+            elif isinstance(v, dict):
+                for result in self.find(message, v):
+                    yield result
+            elif isinstance(v, list):
+                for d in v:
+                    for result in self.find(message, d):
+                        yield result
+
     def create_keyboard(self, text):
 
         curSection = list(self.find(text, self.load))
@@ -46,18 +59,6 @@ class Keyboard(MainDB):
                     buttons[i].append(KeyboardButton(item))
 
         buttons.append([self.back_button])
+        
         markup = ReplyKeyboardMarkup(buttons, resize_keyboard = True)
         return msg, markup
-
-    #Рекурсивная функция поиска 
-    def find(self, message, dictionary):
-        for k, v in dictionary.items():
-            if k == message:
-                yield v
-            elif isinstance(v, dict):
-                for result in self.find(message, v):
-                    yield result
-            elif isinstance(v, list):
-                for d in v:
-                    for result in self.find(message, d):
-                        yield result

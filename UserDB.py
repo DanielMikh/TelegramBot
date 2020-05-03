@@ -1,8 +1,8 @@
 # Класс для работы с базой данных пользователей
-
+from User import User
 import json
 
-class UserDB():
+class UserDB(User):
     # users: List<UserID>
 
     def __init__(self):

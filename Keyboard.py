@@ -38,7 +38,6 @@ class Keyboard(MainDB):
     def create_keyboard(self, text):
 
         curSection = list(self.find(text, self.load))
-        print(":::::",curSection[0],'\n')
         
         i = 0
 

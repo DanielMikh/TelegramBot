@@ -10,9 +10,12 @@ from User import User
 from UserDB import UserDB
 from Keyboard import Keyboard
 
+from Admin import Admin
+
 user_db = UserDB()
 main_db = MainDB()
 keyboard = Keyboard()
+admin = Admin()
 
 user_last_section = {}
 
@@ -34,18 +37,21 @@ def start_admin(update, context):
         InlineKeyboardButton(text = 'Создать', callback_data = str(ADDING_SECTION)),
         InlineKeyboardButton(text = 'Отредактировать', callback_data = str(EDIT_SECTION))
     ], [
-        InlineKeyboardButton(text='Выход из панели', callback_data = str(ConversationHandler.END))
+        InlineKeyboardButton(text='Выход из панели', callback_data = str(END))
     ]]
     kkeyboard = InlineKeyboardMarkup(buttons)
 
     update.message.reply_text('У администратора есть возможность добавлять разделы и их контекст. '\
-            'Вы будете видеть, в каком разделе находитесь в данный момент.')
+            'Вы видите список разделов и наличие text_msg. При наличии можно отредактировать.')
 
     sections = []
     try:
         currentSection = user_last_section[user.id]
         section = keyboard.find(currentSection, main_db.load)
-        sections = list(section)[0]
+        sec = list(section)[0]
+        sect = list(sec.keys())
+        sections = admin.list_to_str(sect)
+        print("::::SECTIONS", sections)
         # TODO: refresh keyboard
         keyboard.create_keyboard(currentSection)
     except KeyError:
@@ -77,8 +83,11 @@ def create_section(update, context):
 def edit_section(update, context):
     user = User(update.message)
     currentSection = user_last_section[user.id]
+    print("::::curSect", currentSection)
 
     new_section_text = update.message.text
+
+    print("::::new_section_text", update.message.text)
 
     if currentSection is None:
         # main_db.load[new_section_name]['text_msg'] = new_section_text
@@ -87,18 +96,22 @@ def edit_section(update, context):
         section = keyboard.find(currentSection, main_db.load)
         list(section)[0]['text_msg'] = new_section_text
 
+    keyboard.load = main_db.load
     main_db.save_db(main_db.load)
 
-    return ConversationHandler.END
 
 def ask_for_input(update, context):
     """Prompt user to input data for selected feature."""
-    text = 'Окей, пиши.'
-
+    name_text = 'Отлично, напишите название нового раздела.'
+    context_text = 'Хорошо, какую информацию будет присылать раздел? Напишите.'
+    
     context.user_data["func"] = update.callback_query.data
 
     update.callback_query.answer()
-    update.callback_query.edit_message_text(text = text)
+    if context.user_data["func"] == str(ADDING_SECTION):
+        update.callback_query.edit_message_text(text = name_text)
+    elif context.user_data["func"] == str(EDIT_SECTION):
+        update.callback_query.edit_message_text(text = context_text)
 
     return TYPING
 
@@ -110,14 +123,13 @@ def save_input(update, context):
 
     if context.user_data["func"] == str(ADDING_SECTION):
         create_section(update, context)
-    else:
-        pass
+    elif context.user_data["func"] == str(EDIT_SECTION):
+        edit_section(update, context)
 
     return start_admin(update, context)
 
 def cancel(update, context):
-    update.message.reply_text('Bye! I hope we can talk again some day.',
-                              reply_markup = ReplyKeyboardRemove())
+    update.message.reply_text('Bye! I hope we can talk again some day.')
 
     return ConversationHandler.END
 
@@ -131,9 +143,7 @@ def send_start(update, context):
         context.bot.send_message(chat_id = user.id, text = random.choice(msg).format(name = user.username), reply_markup = keyboard.main_menu())
         
         if user.is_admin:
-            context.bot.send_message(parse_mode = 'HTML', chat_id = user.id, text = 'У вас есть <b><i>права</i></b> администратора, введите команду /admin, чтобы внести изменения.🎉')
-            # print([*main_db.load])
-            # context.bot.send_message(chat_id = user.id, text = json.dumps([*main_db.load], ensure_ascii = False))
+            context.bot.send_message(parse_mode = 'HTML', chat_id = user.id, text = 'У вас есть <b><i>права</i></b> администратора, введите команду /admin, чтобы внести изменения.')
     else: 
         context.bot.send_photo(chat_id = user.id, photo = random.choice(photo))
         context.bot.send_message(chat_id = user.id, text = random.choice(msg1).format(name = user.username), reply_markup = keyboard.main_menu())
@@ -143,7 +153,7 @@ def send_start(update, context):
 def return_to_main_menu(update, context):  
     user = User(update.message) 
     keyboard.main_menu()
-    context.bot.send_message(chat_id = user.id, text = 'Хорошо, сделано.', reply_markup = keyboard.main_menu())
+    context.bot.send_message(chat_id = user.id, text = 'Вернемся на главную.', reply_markup = keyboard.main_menu())
 
 
 def button_selection(update, context):
@@ -154,7 +164,7 @@ def button_selection(update, context):
 
     user_last_section[user.id] = section
 
-    context.bot.send_message(chat_id = user.id,text = msg, reply_markup = markup)
+    context.bot.send_message(parse_mode = 'HTML', chat_id = user.id,text = msg, reply_markup = markup)
 
 def main():
     updater = Updater(token = TOKEN, use_context = True)
@@ -162,8 +172,8 @@ def main():
 
     start_handler = CommandHandler('start', send_start)
     
-    msg_handler1 = MessageHandler(Filters.regex('На главную'), return_to_main_menu)
-    msg_handler2 = MessageHandler(Filters.text, button_selection)
+    back_to_main_menu = MessageHandler(Filters.regex('На главную'), return_to_main_menu)
+    button_select = MessageHandler(Filters.text, button_selection)
 
     # selection_handlers = [
     #     CallbackQueryHandler(create_section, pattern='^' + str(ADDING_SECTION) + '$'),
@@ -176,10 +186,9 @@ def main():
     conv_handler = ConversationHandler(
         entry_points = [ CommandHandler("admin", start_admin)],
 
-        # states = { SELECTING_ACTION: selection_handlers,},
          states={
-            SELECTING_ACTION: [CallbackQueryHandler(ask_for_input,
-                                                     pattern='^(?!' + str(END) + ').*$')],
+            SELECTING_ACTION: [CallbackQueryHandler(ask_for_input),  
+            CallbackQueryHandler(cancel, pattern='^' + str(END) + '$')],
             TYPING: [MessageHandler(Filters.text, save_input)],
         },
 
@@ -191,8 +200,8 @@ def main():
     # обработчик разговора
     dp.add_handler(conv_handler)
     
-    dp.add_handler(msg_handler1)
-    dp.add_handler(msg_handler2)
+    dp.add_handler(back_to_main_menu)
+    dp.add_handler(button_select)
 
     updater.start_polling()
     updater.idle()
@@ -211,6 +220,6 @@ if __name__ == "__main__":
     # in_memory_db = {}
 
     # uid = 128376
-    # key = "шлава1"
+    # key = "глава1"
 
     # in_memory_db[uid] = key

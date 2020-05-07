@@ -47,6 +47,7 @@ def start_admin(update, context):
     sections = []
     try:
         currentSection = user_last_section[user.id]
+        print("try user_last_section: ", user_last_section)
         section = keyboard.find(currentSection, main_db.load)
         sec = list(section)[0]
         sect = list(sec.keys())
@@ -55,6 +56,7 @@ def start_admin(update, context):
         # TODO: refresh keyboard
         keyboard.create_keyboard(currentSection)
     except KeyError:
+        print("except user_last_section: ", user_last_section)
         sections = main_db.get_dump()
         # TODO: refresh keyboard
         ReplyKeyboardMarkup(keyboard.main_menu())
@@ -110,10 +112,13 @@ def ask_for_input(update, context):
     update.callback_query.answer()
     if context.user_data["func"] == str(ADDING_SECTION):
         update.callback_query.edit_message_text(text = name_text)
+        return TYPING
     elif context.user_data["func"] == str(EDIT_SECTION):
         update.callback_query.edit_message_text(text = context_text)
-
-    return TYPING
+        return TYPING
+    elif context.user_data["func"] == str(END):
+        print(":::END")
+        cancel(update, context)
 
 
 def save_input(update, context):
@@ -129,9 +134,12 @@ def save_input(update, context):
     return start_admin(update, context)
 
 def cancel(update, context):
-    update.message.reply_text('Bye! I hope we can talk again some day.')
-
-    return ConversationHandler.END
+    print(":::::CANCEL")
+    query = update.callback_query
+    query.answer()
+    query.edit_message_text(
+        text="На этом закончили изменения!"
+    )
 
 
 """Работа с пользователем"""
@@ -155,6 +163,9 @@ def return_to_main_menu(update, context):
     keyboard.main_menu()
     context.bot.send_message(chat_id = user.id, text = 'Вернемся на главную.', reply_markup = keyboard.main_menu())
 
+    del user_last_section[user.id] 
+    return user_last_section 
+
 
 def button_selection(update, context):
     user = User(update.message)
@@ -175,24 +186,17 @@ def main():
     back_to_main_menu = MessageHandler(Filters.regex('На главную'), return_to_main_menu)
     button_select = MessageHandler(Filters.text, button_selection)
 
-    # selection_handlers = [
-    #     CallbackQueryHandler(create_section, pattern='^' + str(ADDING_SECTION) + '$'),
-    #     CallbackQueryHandler(callback_handler),
-    #     CallbackQueryHandler(edit_section, pattern='^' + str(EDIT_SECTION) + '$'),
-    #     CallbackQueryHandler(cancel, pattern='^' + str(ConversationHandler.END) + '$'),
-    # ]
-
-    # Set up top level ConversationHandler (selecting action)
+    # Обработчик разговора команды /admin
     conv_handler = ConversationHandler(
         entry_points = [ CommandHandler("admin", start_admin)],
 
          states={
-            SELECTING_ACTION: [CallbackQueryHandler(ask_for_input),  
-            CallbackQueryHandler(cancel, pattern='^' + str(END) + '$')],
+            SELECTING_ACTION: [CallbackQueryHandler(ask_for_input)],
             TYPING: [MessageHandler(Filters.text, save_input)],
+            END: [CallbackQueryHandler(cancel)]
         },
 
-        fallbacks = [ ],
+        fallbacks = [CommandHandler("admin", start_admin)],
     )
 
     dp.add_handler(start_handler)

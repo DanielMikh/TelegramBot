@@ -49,7 +49,7 @@ class Keyboard(MainDB):
                 for d in v:
                     for result in self.find(message, d):
                         yield result
-
+    # создание кнопок
     def create_keyboard(self, text, user_id):
         curSection = list(self.find(text, self.load))
         

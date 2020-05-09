@@ -35,7 +35,6 @@ class Keyboard(MainDB):
                 buttons[i].append(KeyboardButton(curChar))
 
         markup = ReplyKeyboardMarkup(buttons, resize_keyboard = True)
-        print("markup", markup)
         return markup
 
     #Рекурсивная функция поиска 
@@ -55,7 +54,6 @@ class Keyboard(MainDB):
         curSection = list(self.find(text, self.load))
         
         i = 0
-
         msg = ''
 
         buttons = [[]]

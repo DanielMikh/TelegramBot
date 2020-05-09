@@ -22,7 +22,7 @@ user_last_section = {}
 
 SELECTING_ACTION, ADDING_SECTION, EDIT_SECTION, CURRENT_FEATURE, TYPING, FEATURES = range(6)
 
-# Shortcut for ConversationHandler.END
+# Конец диалога /admin
 END = ConversationHandler.END
 
 """Администрирование"""

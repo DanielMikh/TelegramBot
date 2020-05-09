@@ -210,7 +210,6 @@ def return_to_section_before(update, context):
     # section = user_path_section[user.id][-1]
     # print("return_to_section_before: ", user_path_section)
 
-    
     msg, markup = keyboard.create_keyboard(section, user.id)
     context.bot.send_message(parse_mode = 'HTML', chat_id = user.id,text = msg, reply_markup = markup)
 

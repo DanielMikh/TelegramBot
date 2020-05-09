@@ -7,7 +7,7 @@ class MainDB():
         with open('new_db.json','r') as data:
             self.load = json.load(data)
 
-            self.dump = json.dumps([*self.load], ensure_ascii = False)
+            # self.dump = json.dumps([*self.load], ensure_ascii = False)
 
     def get_dump(self):
         self.dump = json.dumps([*self.load], ensure_ascii = False)

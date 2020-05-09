@@ -6,11 +6,26 @@ from telegram import KeyboardButton, ReplyKeyboardMarkup
 class Keyboard(MainDB):
 
     back_button = KeyboardButton('На главную')
+    section_back_button = KeyboardButton('Назад')
+    def __init__(self):
+        super().__init__()
+        self.user_path_section = {}
+
+    def add_user_section(self, user_id, section):
+        if user_id not in self.user_path_section:
+            self.user_path_section[user_id] = []
+
+        self.user_path_section[user_id].append(section)
+
+    def clear(self, user_id):
+        self.user_path_section[user_id].clear()
 
     # Вызов главного меню
     def main_menu(self):
         buttons = [[]]
+        
         i = 0
+
         for curChar in self.load:
             if len(buttons[i]) == 3: 
                 i += 1
@@ -18,8 +33,9 @@ class Keyboard(MainDB):
                 buttons[i].append(KeyboardButton(curChar))
             else:
                 buttons[i].append(KeyboardButton(curChar))
-        
+
         markup = ReplyKeyboardMarkup(buttons, resize_keyboard = True)
+        print("markup", markup)
         return markup
 
     #Рекурсивная функция поиска 
@@ -35,13 +51,12 @@ class Keyboard(MainDB):
                     for result in self.find(message, d):
                         yield result
 
-    def create_keyboard(self, text):
-
+    def create_keyboard(self, text, user_id):
         curSection = list(self.find(text, self.load))
         
         i = 0
 
-        msg = 'Пусто'
+        msg = ''
 
         buttons = [[]]
         for item in curSection[0]:
@@ -56,6 +71,9 @@ class Keyboard(MainDB):
                     buttons[i].append(KeyboardButton(item))
                 else:
                     buttons[i].append(KeyboardButton(item))
+
+        if len(self.user_path_section[user_id]) > 1:
+            buttons.append([self.section_back_button])
 
         buttons.append([self.back_button])
         

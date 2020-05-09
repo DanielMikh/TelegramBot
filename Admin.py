@@ -1,5 +1,5 @@
 class Admin():
-
+# Можно переделать цикл, чтобы 'text_msg' всегда стоял в конце при выводе списка разделов
     def list_to_str(self, _list):
         i = 1
         length = len(_list)

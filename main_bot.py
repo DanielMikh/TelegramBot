@@ -1,22 +1,20 @@
+import random
+
 from telegram import (InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardRemove, ReplyKeyboardMarkup)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           ConversationHandler, CallbackQueryHandler)
-
-import random
 
 from config import TOKEN, msg, msg1, photo, main_msg_inuserbd, main_msg_notinuserdb
 from MainDB import MainDB
 from User import User
 from UserDB import UserDB
 from Keyboard import Keyboard
-
 from Admin import Admin
 
 user_db = UserDB()
 main_db = MainDB()
 keyboard = Keyboard()
 admin = Admin()
-
 user_last_section = {}
 
 SELECTING_ACTION, ADDING_SECTION, EDIT_SECTION, CURRENT_FEATURE, TYPING, FEATURES=range(6)

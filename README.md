@@ -1,3 +1,4 @@
 # graduation_project
-1. Разработка виртуального ассистента(чат-бота) в Telegram для комитета по градостроительству и архитектуре С-Пб.
-2. Здесь нет и не будет БД и конфига!
+# TelegramBot for Committee for Urban Planning and Architecture of the City of St. Petersburg.
+# Client and admin interfaces are realised in it.
+# Data storage system is built on the basis of JSON format

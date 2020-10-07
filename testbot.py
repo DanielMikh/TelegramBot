@@ -18,7 +18,6 @@ keyboard = Keyboard()
 admin = Admin()
 
 user_last_section = {}
-# user_path_section = {}
 
 SELECTING_ACTION, ADDING_SECTION, EDIT_SECTION, CURRENT_FEATURE, TYPING, FEATURES = range(6)
 
@@ -53,17 +52,14 @@ def start_admin(update, context):
         sect = list(sec.keys())
         sections = admin.list_to_str(sect)
         print("::::SECTIONS", sections)
-        # TODO: refresh keyboard
         keyboard.create_keyboard(currentSection, user.id)
     except KeyError:
         print("except user_last_section: ", user_last_section)
         sections = main_db.get_dump()
-        # TODO: refresh keyboard
         ReplyKeyboardMarkup(keyboard.main_menu())
 
     update.message.reply_text(text = sections, reply_markup = kkeyboard)
 
-    # context.user_data[START_OVER] = False
     return SELECTING_ACTION
     
 
@@ -92,7 +88,6 @@ def edit_section(update, context):
     print("::::new_section_text", update.message.text)
 
     if currentSection is None:
-        # main_db.load[new_section_name]['text_msg'] = new_section_text
         return
     else:
         section = keyboard.find(currentSection, main_db.load)
@@ -167,8 +162,6 @@ def return_to_main_menu(update, context):
 
     context.bot.send_message(chat_id = user.id, text = 'Вернемся на главную.', reply_markup = keyboard.main_menu())
 
-    # user_path_section[user.id].clear()
-    # print("clear: ", user_path_section)
     keyboard.clear(user_id = user.id)
 
     del user_last_section[user.id] 
@@ -184,19 +177,11 @@ def button_selection(update, context):
 
     if list(res_compare) != for_compare:
         keyboard.add_user_section(user_id = user.id, section = section)
+        
     print("button_select::::", keyboard.user_path_section)
-    
-    # if user.id not in user_path_section:
-    #     user_path_section[user.id] = []
-    #     print("not in: ", user_path_section)
-
-    # user_path_section[user.id].append(section)
-    # print(":::::user_path_section ", user_path_section)
 
     msg, markup = keyboard.create_keyboard(section, user.id)
-
     user_last_section[user.id] = section
-
     context.bot.send_message(parse_mode = 'HTML', chat_id = user.id, text = msg, reply_markup = markup)
 
 def return_to_section_before(update, context):
@@ -204,11 +189,6 @@ def return_to_section_before(update, context):
 
     keyboard.user_path_section[user.id].pop()
     section = keyboard.user_path_section[user.id][-1]
-    
-    
-    # user_path_section[user.id].pop()
-    # section = user_path_section[user.id][-1]
-    # print("return_to_section_before: ", user_path_section)
 
     msg, markup = keyboard.create_keyboard(section, user.id)
     context.bot.send_message(parse_mode = 'HTML', chat_id = user.id,text = msg, reply_markup = markup)

@@ -19,7 +19,7 @@ admin = Admin()
 
 user_last_section = {}
 
-SELECTING_ACTION, ADDING_SECTION, EDIT_SECTION, CURRENT_FEATURE, TYPING, FEATURES = range(6)
+SELECTING_ACTION, ADDING_SECTION, EDIT_SECTION, CURRENT_FEATURE, TYPING, FEATURES=range(6)
 
 # Конец диалога /admin
 END = ConversationHandler.END
@@ -28,15 +28,15 @@ END = ConversationHandler.END
 def start_admin(update, context):
     user = User(update.message)
     if not user.is_admin:
-        context.bot.send_message(chat_id = user.id, text = 'У вас нет прав.')
+        context.bot.send_message(chat_id=user.id, text='У вас нет прав.')
         return
     
     """Выберите действие: Создать/отредактировать раздел"""
     buttons = [[
-        InlineKeyboardButton(text = 'Создать', callback_data = str(ADDING_SECTION)),
-        InlineKeyboardButton(text = 'Отредактировать', callback_data = str(EDIT_SECTION))
+        InlineKeyboardButton(text='Создать', callback_data=str(ADDING_SECTION)),
+        InlineKeyboardButton(text='Отредактировать', callback_data=str(EDIT_SECTION))
     ], [
-        InlineKeyboardButton(text='Выход из панели', callback_data = str(END))
+        InlineKeyboardButton(text='Выход из панели', callback_data=str(END))
     ]]
     kkeyboard = InlineKeyboardMarkup(buttons)
 
@@ -58,7 +58,7 @@ def start_admin(update, context):
         sections = main_db.get_dump()
         ReplyKeyboardMarkup(keyboard.main_menu())
 
-    update.message.reply_text(text = sections, reply_markup = kkeyboard)
+    update.message.reply_text(text=sections, reply_markup=kkeyboard)
 
     return SELECTING_ACTION
     
@@ -106,10 +106,10 @@ def ask_for_input(update, context):
     update.callback_query.answer()
 
     if context.user_data["func"] == str(ADDING_SECTION):
-        update.callback_query.edit_message_text(text = name_text)
+        update.callback_query.edit_message_text(text=name_text)
         return TYPING
     elif context.user_data["func"] == str(EDIT_SECTION):
-        update.callback_query.edit_message_text(text = context_text)
+        update.callback_query.edit_message_text(text=context_text)
         return TYPING
     elif context.user_data["func"] == str(END):
         print(":::END")
@@ -132,7 +132,7 @@ def cancel(update, context):
     print(":::::CANCEL")
     query = update.callback_query
     query.answer()
-    query.edit_message_text(text = "На этом закончили изменения!")
+    query.edit_message_text(text="На этом закончили изменения!")
 
 
 """Работа с пользователем"""
@@ -140,17 +140,17 @@ def send_start(update, context):
     user = User(update.message)
 
     if user.id in user_db.users:
-        context.bot.send_photo(chat_id = user.id, photo = random.choice(photo))
-        context.bot.send_message(chat_id = user.id, text = random.choice(msg).format(name = user.username), reply_markup = keyboard.main_menu())
-        context.bot.send_message(chat_id = user.id, text = main_msg_inuserbd)
+        context.bot.send_photo(chat_id=user.id, photo=random.choice(photo))
+        context.bot.send_message(chat_id=user.id, text=random.choice(msg).format(name=user.username), reply_markup=keyboard.main_menu())
+        context.bot.send_message(chat_id=user.id, text=main_msg_inuserbd)
         
         if user.is_admin:
-            context.bot.send_message(parse_mode = 'HTML', chat_id = user.id, text = 'У вас есть <b><i>права</i></b> администратора, введите команду /admin, чтобы внести изменения.')
+            context.bot.send_message(parse_mode='HTML', chat_id=user.id, text='У вас есть <b><i>права</i></b> администратора, введите команду /admin, чтобы внести изменения.')
     else: 
-        context.bot.send_photo(chat_id = user.id, photo = random.choice(photo))
-        context.bot.send_message(chat_id = user.id, text = random.choice(msg1).format(name = user.username), reply_markup = keyboard.main_menu())
+        context.bot.send_photo(chat_id=user.id, photo=random.choice(photo))
+        context.bot.send_message(chat_id=user.id, text=random.choice(msg1).format(name=user.username), reply_markup=keyboard.main_menu())
 
-        context.bot.send_message(chat_id = user.id, text = main_msg_notinuserdb)
+        context.bot.send_message(chat_id=user.id, text=main_msg_notinuserdb)
 
         user_db.save_user(user.id)
     
@@ -160,7 +160,7 @@ def return_to_main_menu(update, context):
 
     keyboard.main_menu()
 
-    context.bot.send_message(chat_id = user.id, text = 'Вернемся на главную.', reply_markup = keyboard.main_menu())
+    context.bot.send_message(chat_id=user.id, text='Вернемся на главную.', reply_markup=keyboard.main_menu())
 
     keyboard.clear(user_id = user.id)
 
@@ -182,7 +182,7 @@ def button_selection(update, context):
 
     msg, markup = keyboard.create_keyboard(section, user.id)
     user_last_section[user.id] = section
-    context.bot.send_message(parse_mode = 'HTML', chat_id = user.id, text = msg, reply_markup = markup)
+    context.bot.send_message(parse_mode='HTML', chat_id=user.id, text=msg, reply_markup=markup)
 
 def return_to_section_before(update, context):
     user = User(update.message)
@@ -191,10 +191,10 @@ def return_to_section_before(update, context):
     section = keyboard.user_path_section[user.id][-1]
 
     msg, markup = keyboard.create_keyboard(section, user.id)
-    context.bot.send_message(parse_mode = 'HTML', chat_id = user.id,text = msg, reply_markup = markup)
+    context.bot.send_message(parse_mode='HTML', chat_id=user.id,text=msg, reply_markup=markup)
 
 def main():
-    updater = Updater(token = TOKEN, use_context = True)
+    updater = Updater(token=TOKEN, use_context=True)
     dp = updater.dispatcher
 
     start_handler = CommandHandler('start', send_start)
